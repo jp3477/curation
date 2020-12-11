@@ -20,7 +20,7 @@ from utils import bq
 
 LOGGER = logging.getLogger(__name__)
 
-CONCEPT_ANCESTOR_EXT = 'concept_ancestor_ext'
+CONCEPT_ANCESTOR_EXT = 'concept_ancestor_extension'
 
 CONCEPT_ANCESTOR_EXT_QUERY = '''
 DECLARE
@@ -43,20 +43,21 @@ CREATE OR REPLACE TABLE
       c.vocabulary_id = 'LOINC'
       AND domain_id = 'Measurement' ) AS loinc_ids
   JOIN
-    `{project}.{dataset}.concept_relationship` AS cr
+    `ehr_ops.concept_relationship` AS cr
   ON
     loinc_ids.ancestor_concept_id = cr.concept_id_1
     AND relationship_id IN ('Subsumes',
       'Component of')
+    AND cr.concept_id_1 <> cr.concept_id_2
   JOIN
-    `{project}.{dataset}.concept` AS c2
+    `ehr_ops.concept` AS c2
   ON
     cr.concept_id_2 = c2.concept_id
     AND c2.domain_id = 'Measurement' );
 LOOP
   CREATE OR REPLACE TEMP TABLE descendants_next_iteration AS (
   SELECT
-    cae.ancestor_concept_id,
+    DISTINCT cae.ancestor_concept_id,
     cr.concept_id_2 AS descendant_concept_id,
     cae.levels_of_separation + 1 AS levels_of_separation
   FROM
@@ -67,6 +68,7 @@ LOOP
     cae.descendant_concept_id = cr.concept_id_1
     AND relationship_id IN ('Subsumes',
       'Component of')
+    AND cr.concept_id_1 <> cr.concept_id_2
   JOIN
     `{project}.{dataset}.concept` AS c2
   ON
@@ -84,6 +86,7 @@ SET
     cae_new.ancestor_concept_id = cae.ancestor_concept_id
     AND cae_new.descendant_concept_id = cae.descendant_concept_id
     AND cae_new.levels_of_separation = cae.levels_of_separation
+    AND cae.ancestor_concept_id <> cae_new.descendant_concept_id
   WHERE
     cae.ancestor_concept_id IS NULL );
 IF
@@ -104,12 +107,13 @@ ON
   cae_new.ancestor_concept_id = cae.ancestor_concept_id
   AND cae_new.descendant_concept_id = cae.descendant_concept_id
   AND cae_new.levels_of_separation = cae.levels_of_separation
+  AND cae.ancestor_concept_id <> cae_new.descendant_concept_id
 WHERE
   cae.ancestor_concept_id IS NULL;
 END LOOP
   ;
 CREATE OR REPLACE TABLE
-  `{project}.{dataset}.{ancestor_extension}` AS
+  ehr_ops.concept_ancestor_extension AS
 SELECT
   ancestor_concept_id,
   descendant_concept_id,
