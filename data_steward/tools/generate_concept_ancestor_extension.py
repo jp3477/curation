@@ -139,7 +139,7 @@ def generate_concept_ancestor_extension(project_id, dataset_id):
     query = CONCEPT_ANCESTOR_EXT_QUERY.format(
         project=project_id,
         dataset=dataset_id,
-        ancestor_extension=CONCEPT_ANCESTOR_EXT)
+        ancestor_extension=CONCEPT_ANCESTOR_EXTENSION)
     query_job = client.query(query)
     res = query_job.result()
     return res
