@@ -1,7 +1,7 @@
 """
 concept_relationship stores two types of relationships 
 1) hierarchical relationships: 'is_a' / 'subsume' that defines the hierarchy of the vocabulary;
-2.) associative relationships:  relationships across the hierarchy such as Drug A
+2) associative relationships:  relationships across the hierarchy such as Drug A
 'is an indication of' Condition B. The concept_ancestor table is built based on 'Is A' and 'Subsume' relationships
 recursively so any ancestor/descendent pairs (regardless of the levels of separation) are pre-computed for us.
 
@@ -20,7 +20,7 @@ from utils import bq
 
 LOGGER = logging.getLogger(__name__)
 
-CONCEPT_ANCESTOR_EXT = 'concept_ancestor_extension'
+CONCEPT_ANCESTOR_EXTENSION = 'concept_ancestor_extension'
 
 CONCEPT_ANCESTOR_EXT_QUERY = '''
 DECLARE
@@ -129,7 +129,7 @@ GROUP BY
 
 def generate_concept_ancestor_extension(project_id, dataset_id):
     """
-    generates concept ancestor extension table from the concept relationship table for for LOINC hierarchy
+    generates concept ancestor extension table from the concept relationship table for LOINC hierarchy
     :param project_id: identifier for project id
     :param dataset_id: identifier for dataset
     :return: Bq job result
