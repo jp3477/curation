@@ -16,11 +16,10 @@ This script generates the concept_ancestor_ext table for all the concepts in mea
 import argparse
 import logging
 
+from common import CONCEPT_ANCESTOR_EXTENSION
 from utils import bq
 
 LOGGER = logging.getLogger(__name__)
-
-CONCEPT_ANCESTOR_EXTENSION = 'concept_ancestor_extension'
 
 CONCEPT_ANCESTOR_EXT_QUERY = '''
 DECLARE
@@ -43,14 +42,14 @@ CREATE OR REPLACE TABLE
       c.vocabulary_id = 'LOINC'
       AND domain_id = 'Measurement' ) AS loinc_ids
   JOIN
-    `ehr_ops.concept_relationship` AS cr
+    `{project}.{dataset}.concept_relationship` AS cr
   ON
     loinc_ids.ancestor_concept_id = cr.concept_id_1
     AND relationship_id IN ('Subsumes',
       'Component of')
     AND cr.concept_id_1 <> cr.concept_id_2
   JOIN
-    `ehr_ops.concept` AS c2
+    `{project}.{dataset}.concept` AS c2
   ON
     cr.concept_id_2 = c2.concept_id
     AND c2.domain_id = 'Measurement' );
@@ -113,7 +112,7 @@ WHERE
 END LOOP
   ;
 CREATE OR REPLACE TABLE
-  ehr_ops.concept_ancestor_extension AS
+  `{project}.{dataset}.{ancestor_extension}` AS
 SELECT
   ancestor_concept_id,
   descendant_concept_id,

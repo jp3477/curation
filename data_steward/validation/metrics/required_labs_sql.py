@@ -27,8 +27,8 @@ UNION ALL
 SELECT
   *
 FROM
-  `{project_id}.{vocab_dataset_id}.concept_ancestor_extension`
-)
+  `{project_id}.{ehr_ops_dataset_id}.concept_ancestor_extension`
+),
 
 get_direct_parents_loinc_group AS
 (
